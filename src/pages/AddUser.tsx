@@ -22,7 +22,6 @@ const AddUser = () => {
       const storedUsers = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (storedUsers) {
         const parsedUsers = JSON.parse(storedUsers);
-
         if (Array.isArray(parsedUsers)) {
           setUsers(parsedUsers);
         } else {
@@ -49,63 +48,116 @@ const AddUser = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Add New User</h1>
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        alignItems: "flex-start",
+        gap: "40px",
+        padding: "20px",
+      }}
+    >
+      {/* Form Section */}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        style={{
+          maxWidth: "400px",
+          width: "100%",
+          padding: "20px",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+        }}
+      >
+        <h2 style={{ marginBottom: "20px" }}>Add New User</h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} style={{ marginBottom: "30px" }}>
-        <div>
-          <label>Name</label>
-          <br />
-          <input {...register("name")} />
-          {errors.name && <p style={{ color: "red" }}>{errors.name.message}</p>}
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "5px" }}>Name</label>
+          <input
+            {...register("name")}
+            style={{ width: "100%", padding: "8px", border: "1px solid #ccc" }}
+          />
+          {errors.name && (
+            <p style={{ fontSize: "12px", color: "red" }}>{errors.name.message}</p>
+          )}
         </div>
 
-        <div>
-          <label>Email</label>
-          <br />
-          <input {...register("email")} />
-          {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "5px" }}>Email</label>
+          <input
+            {...register("email")}
+            style={{ width: "100%", padding: "8px", border: "1px solid #ccc" }}
+          />
+          {errors.email && (
+            <p style={{ fontSize: "12px", color: "red" }}>{errors.email.message}</p>
+          )}
         </div>
 
-        <div>
-          <label>Age</label>
-          <br />
-          <input type="number" {...register("age", { valueAsNumber: true })} />
-          {errors.age && <p style={{ color: "red" }}>{errors.age.message}</p>}
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "5px" }}>Age</label>
+          <input
+            type="number"
+            {...register("age", { valueAsNumber: true })}
+            style={{ width: "100%", padding: "8px", border: "1px solid #ccc" }}
+          />
+          {errors.age && (
+            <p style={{ fontSize: "12px", color: "red" }}>{errors.age.message}</p>
+          )}
         </div>
 
-        <button type="submit" style={{ marginTop: "10px" }}>
+        <button
+          type="submit"
+          style={{
+            width: "100%",
+            padding: "10px",
+            border: "none",
+            borderRadius: "4px",
+            backgroundColor: "#eee",
+            cursor: "pointer",
+          }}
+        >
           Add User
         </button>
       </form>
 
-      {users.length > 0 && (
-        <div>
-          <h2>User List</h2>
-          <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))" }}>
-            {users.map((user, idx) => (
-              <div
-                key={idx}
-                style={{
-                  border: "1px solid #ccc",
-                  borderRadius: "8px",
-                  padding: "16px",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                }}
-              >
-                <h3 style={{ margin: "0 0 8px" }}>{user.name}</h3>
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Email:</strong> {user.email}
-                </p>
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Age:</strong> {user.age}
-                </p>
-                
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Table Section */}
+      <div style={{ maxWidth: "600px", width: "100%" }}>
+        <h2 style={{ marginBottom: "10px" }}>User List</h2>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            border: "1px solid gray",
+          }}
+        >
+          <thead>
+            <tr>
+              <th style={{ border: "1px solid gray", padding: "8px" }}>#</th>
+              <th style={{ border: "1px solid gray", padding: "8px" }}>Name</th>
+              <th style={{ border: "1px solid gray", padding: "8px" }}>Email</th>
+              <th style={{ border: "1px solid gray", padding: "8px" }}>Age</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.length === 0 ? (
+              <tr>
+                <td colSpan={4} style={{ textAlign: "center", padding: "12px" }}>
+                  No users yet.
+                </td>
+              </tr>
+            ) : (
+              users.map((user, idx) => (
+                <tr key={idx}>
+                  <td style={{ border: "1px solid gray", padding: "8px" }}>{idx + 1}</td>
+                  <td style={{ border: "1px solid gray", padding: "8px" }}>{user.name}</td>
+                  <td style={{ border: "1px solid gray", padding: "8px" }}>{user.email}</td>
+                  <td style={{ border: "1px solid gray", padding: "8px" }}>{user.age}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
