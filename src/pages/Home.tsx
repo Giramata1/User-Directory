@@ -29,6 +29,10 @@ const Home = () => {
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleClearSearch = () => {
+    setSearchTerm("");
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
@@ -51,18 +55,80 @@ const Home = () => {
         }}
       >
         <h1 style={{ margin: 0 }}>User Directory</h1>
-        <input
-          type="text"
-          placeholder="Search users"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+        <div
           style={{
-            padding: "8px",
+            position: "relative",
             width: "100%",
             maxWidth: "300px",
-            boxSizing: "border-box",
+            display: "flex",
+            alignItems: "center",
           }}
-        />
+        >
+          <input
+            type="text"
+            placeholder="Search users by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            aria-label="Search users"
+            style={{
+              padding: "10px 40px 10px 36px",
+              width: "100%",
+              boxSizing: "border-box",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              fontSize: "14px",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+              outline: "none",
+              transition: "border-color 0.3s, box-shadow 0.3s",
+              color: "darkblue", // Set text color to darkblue
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#007bff";
+              e.target.style.boxShadow = "0 0 8px rgba(0, 123, 255, 0.3)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "#ccc";
+              e.target.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
+            }}
+          />
+          <span
+            style={{
+              position: "absolute",
+              left: "12px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "darkblue", // Match icon color with text
+              fontSize: "16px",
+            }}
+          >
+            🔍
+          </span>
+          {searchTerm && (
+            <button
+              onClick={handleClearSearch}
+              aria-label="Clear search"
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                color: "#888",
+                fontSize: "16px",
+                cursor: "pointer",
+                padding: "0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "darkblue")} // Hover color matches theme
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       {filteredUsers.length === 0 ? (
