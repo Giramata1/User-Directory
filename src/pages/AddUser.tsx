@@ -58,7 +58,7 @@ const AddUser = () => {
         padding: "20px",
       }}
     >
-      {/* Form Section */}
+    
       <form
         onSubmit={handleSubmit(onSubmit)}
         style={{
@@ -120,7 +120,7 @@ const AddUser = () => {
         </button>
       </form>
 
-      {/* Table Section */}
+     
       <div style={{ maxWidth: "600px", width: "100%" }}>
         <h2 style={{ marginBottom: "10px" }}>User List</h2>
         <table
