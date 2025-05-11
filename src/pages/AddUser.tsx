@@ -42,11 +42,7 @@ const AddUser = () => {
     reset();
   };
 
-  const handleRemove = (index: number) => {
-    const updatedUsers = users.filter((_, i) => i !== index);
-    setUsers(updatedUsers);
-  };
-
+  
   return (
     <div
       style={{
