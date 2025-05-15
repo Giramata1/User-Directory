@@ -9,73 +9,41 @@ const NavBar = () => {
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
-    document.body.setAttribute("data-theme", newTheme);
     localStorage.setItem("theme", newTheme);
+
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
 
   useEffect(() => {
-    document.body.setAttribute("data-theme", theme);
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   }, [theme]);
 
   return (
     <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "15px 20px",
-        background: theme === "light" ? "#ffffff" : "#1a1a1a",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        marginBottom: "20px",
-        flexWrap: "wrap",
-        gap: "10px",
-      }}
+      className={`flex justify-between items-center p-4 mb-5 flex-wrap gap-2
+        ${theme === "light" ? "bg-white text-gray-900" : "bg-gray-900 text-gray-100"}`}
+      style={{ boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "20px",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="flex gap-5 flex-wrap">
         <Link
           to="/"
-          style={{
-            textDecoration: "none",
-            color: theme === "light" ? "#333" : "#ddd",
-            fontWeight: "500",
-            fontSize: "16px",
-            padding: "8px 12px",
-            borderRadius: "4px",
-            transition: "background 0.2s, color 0.2s",
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = theme === "light" ? "#f0f0f0" : "#333";
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = "transparent";
-          }}
+          className={`px-3 py-2 rounded transition 
+            ${theme === "light" ? "text-gray-800 hover:bg-gray-100" : "text-gray-200 hover:bg-gray-700"}`}
         >
           Home
         </Link>
         <Link
           to="/add-user"
-          style={{
-            textDecoration: "none",
-            color: theme === "light" ? "#333" : "#ddd",
-            fontWeight: "500",
-            fontSize: "16px",
-            padding: "8px 12px",
-            borderRadius: "4px",
-            transition: "background 0.2s, color 0.2s",
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = theme === "light" ? "#f0f0f0" : "#333";
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = "transparent";
-          }}
+          className={`px-3 py-2 rounded transition 
+            ${theme === "light" ? "text-gray-800 hover:bg-gray-100" : "text-gray-200 hover:bg-gray-700"}`}
         >
           Add User
         </Link>
@@ -83,26 +51,8 @@ const NavBar = () => {
 
       <button
         onClick={toggleTheme}
-        style={{
-          background: theme === "light" ? "#f0f0f0" : "#333",
-          border: "none",
-          padding: "8px 16px",
-          borderRadius: "20px",
-          cursor: "pointer",
-          fontSize: "14px",
-          fontWeight: "500",
-          color: theme === "light" ? "#333" : "#ddd",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          transition: "background 0.2s, transform 0.1s",
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.transform = "scale(1.05)";
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.transform = "scale(1)";
-        }}
+        className={`px-4 py-2 rounded-full cursor-pointer transition
+          ${theme === "light" ? "bg-gray-200 text-gray-900 hover:bg-gray-300" : "bg-gray-700 text-gray-200 hover:bg-gray-600"}`}
       >
         {theme === "light" ? "🌙 Dark" : "☀️ Light"}
       </button>
