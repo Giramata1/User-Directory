@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userFormSchema, UserFormData, Role } from "../types";
 
+type UserWithId = UserFormData & { id: string };
 const LOCAL_STORAGE_KEY = "addedUsers";
 
 const AddUser = () => {
@@ -15,175 +16,203 @@ const AddUser = () => {
     resolver: zodResolver(userFormSchema),
   });
 
-  const [users, setUsers] = useState<UserFormData[]>([]);
+  const [users, setUsers] = useState<UserWithId[]>([]);
+  const [storageError, setStorageError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
       const storedUsers = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (storedUsers) {
-        const parsedUsers = JSON.parse(storedUsers);
-        if (Array.isArray(parsedUsers)) {
-          setUsers(parsedUsers);
-        } else {
-          console.error("Stored users are not in an array format");
+        const parsedUsers = JSON.parse(storedUsers) as UserWithId[];
+        const validatedUsers = Array.isArray(parsedUsers)
+          ? parsedUsers.filter(
+              (user) =>
+                user &&
+                typeof user.id === "string" &&
+                typeof user.name === "string" &&
+                typeof user.email === "string" &&
+                typeof user.age === "number" &&
+                typeof user.role === "string"
+            )
+          : [];
+
+        if (parsedUsers.length !== validatedUsers.length) {
+          setStorageError("Some invalid user data was ignored.");
         }
+
+        setUsers(validatedUsers);
       }
     } catch (e) {
-      console.error("Failed to parse users from localStorage", e);
+      setStorageError("Failed to load users. Data may be corrupted.");
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
+      setStorageError(null);
+    } catch (e) {
+      setStorageError("Failed to save users. Storage may be full.");
+    }
   }, [users]);
 
   const onSubmit = (data: UserFormData) => {
-    setUsers((prev) => [...prev, data]);
+    const newUser: UserWithId = { ...data, id: crypto.randomUUID() };
+    setUsers((prev) => [...prev, newUser]);
     reset();
   };
 
+  const handleRemove = (id: string) => {
+    setUsers((prev) => prev.filter((user) => user.id !== id));
+  };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        alignItems: "flex-start",
-        gap: "40px",
-        padding: "20px",
-      }}
-    >
+    <div className="flex flex-wrap justify-center gap-10 p-6 font-sans">
+      {/* Storage error */}
+      {storageError && (
+        <div className="w-full max-w-md p-4 bg-red-100 text-red-700 rounded-md mb-6">
+          {storageError}
+        </div>
+      )}
+
+      {/* Form */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        style={{
-          maxWidth: "400px",
-          width: "100%",
-          padding: "20px",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-        }}
+        className="max-w-md w-full p-6 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow"
       >
-        <h2 style={{ marginBottom: "20px" }}>Add New User</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
+          Add New User
+        </h2>
 
-        <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Name</label>
+        <div className="mb-5">
+          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+            Name
+          </label>
           <input
             {...register("name")}
-            style={{ width: "100%", padding: "8px", border: "1px solid #ccc" }}
+            className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
+              errors.name
+                ? "border-red-500 focus:ring-red-400"
+                : "border-gray-300 focus:ring-blue-400"
+            } dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100`}
           />
           {errors.name && (
-            <p style={{ fontSize: "12px", color: "red" }}>
-              {errors.name.message}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
           )}
         </div>
 
-        <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Email</label>
+        <div className="mb-5">
+          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+            Email
+          </label>
           <input
             {...register("email")}
-            style={{ width: "100%", padding: "8px", border: "1px solid #ccc" }}
+            className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
+              errors.email
+                ? "border-red-500 focus:ring-red-400"
+                : "border-gray-300 focus:ring-blue-400"
+            } dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100`}
           />
           {errors.email && (
-            <p style={{ fontSize: "12px", color: "red" }}>
-              {errors.email.message}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
           )}
         </div>
 
-        <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Age</label>
+        <div className="mb-5">
+          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+            Age
+          </label>
           <input
             type="number"
             {...register("age", { valueAsNumber: true })}
-            style={{ width: "100%", padding: "8px", border: "1px solid #ccc" }}
+            className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
+              errors.age
+                ? "border-red-500 focus:ring-red-400"
+                : "border-gray-300 focus:ring-blue-400"
+            } dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100`}
           />
           {errors.age && (
-            <p style={{ fontSize: "12px", color: "red" }}>
-              {errors.age.message}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{errors.age.message}</p>
           )}
         </div>
 
-        <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Role</label>
+        <div className="mb-6">
+          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+            Role
+          </label>
           <select
             {...register("role")}
-            style={{ width: "100%", padding: "8px", border: "1px solid #ccc", color: "darkblue" }}
+            className={`w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 ${
+              errors.role
+                ? "border-red-500 focus:ring-red-400"
+                : "border-gray-300 focus:ring-blue-400"
+            } dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100`}
+            defaultValue=""
           >
-            <option value="">Select a role</option>
+            <option value="" disabled>
+              Select a role
+            </option>
             <option value={Role.ADMIN}>{Role.ADMIN}</option>
             <option value={Role.EDITOR}>{Role.EDITOR}</option>
             <option value={Role.VIEWER}>{Role.VIEWER}</option>
           </select>
           {errors.role && (
-            <p style={{ fontSize: "12px", color: "red" }}>
-              {errors.role.message}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{errors.role.message}</p>
           )}
         </div>
 
         <button
           type="submit"
-          style={{
-            width: "100%",
-            padding: "10px",
-            border: "none",
-            borderRadius: "4px",
-            backgroundColor: "#eee",
-            cursor: "pointer",
-            color: "darkblue"
-          }}
+          className="w-full py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
         >
           Add User
         </button>
       </form>
 
-      <div style={{ maxWidth: "600px", width: "100%" }}>
-        <h2 style={{ marginBottom: "10px" }}>User List</h2>
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            border: "1px solid gray",
-          }}
-        >
+      {/* User List */}
+      <div className="max-w-3xl w-full">
+        <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          User List
+        </h2>
+        <table className="min-w-full border-collapse text-sm rounded-lg overflow-hidden shadow-sm">
           <thead>
-            <tr>
-              <th style={{ border: "1px solid gray", padding: "8px" }}>#</th>
-              <th style={{ border: "1px solid gray", padding: "8px" }}>Name</th>
-              <th style={{ border: "1px solid gray", padding: "8px" }}>Email</th>
-              <th style={{ border: "1px solid gray", padding: "8px" }}>Age</th>
-              <th style={{ border: "1px solid gray", padding: "8px" }}>Role</th>
+            <tr className="bg-blue-600 text-white">
+              <th className="p-3 text-left">#</th>
+              <th className="p-3 text-left">Name</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Age</th>
+              <th className="p-3 text-left">Role</th>
+              <th className="p-3 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0 ? (
-              <tr>
+              <tr className="bg-gray-50 dark:bg-gray-800">
                 <td
-                  colSpan={5}
-                  style={{ textAlign: "center", padding: "12px" }}
+                  colSpan={6}
+                  className="p-4 text-center text-gray-600 dark:text-gray-300"
                 >
                   No users yet.
                 </td>
               </tr>
             ) : (
               users.map((user, idx) => (
-                <tr key={idx}>
-                  <td style={{ border: "1px solid gray", padding: "8px" }}>
-                    {idx + 1}
-                  </td>
-                  <td style={{ border: "1px solid gray", padding: "8px" }}>
-                    {user.name}
-                  </td>
-                  <td style={{ border: "1px solid gray", padding: "8px" }}>
-                    {user.email}
-                  </td>
-                  <td style={{ border: "1px solid gray", padding: "8px" }}>
-                    {user.age}
-                  </td>
-                  <td style={{ border: "1px solid gray", padding: "8px" }}>
-                    {user.role}
+                <tr
+                  key={user.id}
+                  className={idx % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : "bg-white dark:bg-gray-700"}
+                >
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">{idx + 1}</td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">{user.name}</td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">{user.email}</td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">{user.age}</td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">{user.role}</td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">
+                    <button
+                      onClick={() => handleRemove(user.id)}
+                      className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition-colors duration-150"
+                    >
+                      Remove
+                    </button>
                   </td>
                 </tr>
               ))
