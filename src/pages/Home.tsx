@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { User } from "../types";
 
+const LOCAL_STORAGE_KEY = "addedUsers";
+
 const Home = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -10,211 +12,121 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get(
+        const response = await axios.get<User[]>(
           "https://jsonplaceholder.typicode.com/users"
         );
-        setUsers(response.data);
+        const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const localUsers = localData ? JSON.parse(localData) : [];
+        setUsers([...response.data, ...localUsers]);
       } catch (err) {
         setError("Failed to fetch users");
       } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
+
+    fetchData();
   }, []);
 
   const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleClearSearch = () => {
-    setSearchTerm("");
-  };
+  const handleClearSearch = () => setSearchTerm("");
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center mt-20 h-40">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center mt-10 py-4 text-red-600 font-semibold">
+        Error: {error}
+      </div>
+    );
+  }
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        maxWidth: "100%",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: "20px",
-        }}
-      >
-        <h1 style={{ margin: 0 }}>User Directory</h1>
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            maxWidth: "300px",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <input
-            type="text"
-            placeholder="Search users by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            aria-label="Search users"
-            style={{
-              padding: "10px 40px 10px 36px",
-              width: "100%",
-              boxSizing: "border-box",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              fontSize: "14px",
-              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-              outline: "none",
-              transition: "border-color 0.3s, box-shadow 0.3s",
-              color: "darkblue", // Set text color to darkblue
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = "#007bff";
-              e.target.style.boxShadow = "0 0 8px rgba(0, 123, 255, 0.3)";
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = "#ccc";
-              e.target.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
-            }}
-          />
-          <span
-            style={{
-              position: "absolute",
-              left: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "darkblue", // Match icon color with text
-              fontSize: "16px",
-            }}
+    <div className="max-w-6xl mx-auto px-4 py-8 min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+      <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-white mb-6">
+        User Directory
+      </h1>
+
+      <div className="relative max-w-md mx-auto mb-6">
+        <input
+          type="text"
+          placeholder="Search users by name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full py-3 pl-10 pr-10 rounded-lg border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-lg">
+          🔍
+        </span>
+        {searchTerm && (
+          <button
+            onClick={handleClearSearch}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            🔍
-          </span>
-          {searchTerm && (
-            <button
-              onClick={handleClearSearch}
-              aria-label="Clear search"
-              style={{
-                position: "absolute",
-                right: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "none",
-                border: "none",
-                color: "#888",
-                fontSize: "16px",
-                cursor: "pointer",
-                padding: "0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "darkblue")} // Hover color matches theme
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
-            >
-              ✕
-            </button>
-          )}
-        </div>
+            ✕
+          </button>
+        )}
       </div>
 
+      <p className="text-center text-sm text-gray-600 dark:text-gray-400 mb-6">
+        Showing {filteredUsers.length} of {users.length} users
+      </p>
+
       {filteredUsers.length === 0 ? (
-        <p>No users found.</p>
+        <div className="text-center py-16 text-gray-600 dark:text-gray-400">
+          No users found.
+        </div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "14px",
-              minWidth: "600px",
-            }}
-          >
-            <thead>
+        <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+          <table className="min-w-full text-sm text-left bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
+            <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
               <tr>
-                <th
-                  style={{
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    fontWeight: "bold",
-                    textAlign: "left",
-                  }}
-                >
+                <th className="px-6 py-4 border-b border-gray-300 dark:border-gray-600">
                   Name
                 </th>
-                <th
-                  style={{
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    fontWeight: "bold",
-                    textAlign: "left",
-                  }}
-                >
+                <th className="px-6 py-4 border-b border-gray-300 dark:border-gray-600">
                   Email
                 </th>
-                <th
-                  style={{
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    fontWeight: "bold",
-                    textAlign: "left",
-                  }}
-                >
+                <th className="px-6 py-4 border-b border-gray-300 dark:border-gray-600">
                   City
                 </th>
-                <th
-                  style={{
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    fontWeight: "bold",
-                    textAlign: "left",
-                  }}
-                >
+                <th className="px-6 py-4 border-b border-gray-300 dark:border-gray-600">
                   Zipcode
                 </th>
-                <th
-                  style={{
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    fontWeight: "bold",
-                    textAlign: "left",
-                  }}
-                >
+                <th className="px-6 py-4 border-b border-gray-300 dark:border-gray-600">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
-                <tr key={user.id} style={{ borderBottom: "1px solid #ccc" }}>
-                  <td style={{ padding: "8px" }}>{user.name}</td>
-                  <td style={{ padding: "8px" }}>{user.email}</td>
-                  <td style={{ padding: "8px" }}>{user.address?.city}</td>
-                  <td style={{ padding: "8px" }}>{user.address?.zipcode}</td>
-                  <td style={{ padding: "8px" }}>
+                <tr
+                  key={user.id}
+                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                >
+                  <td className="px-6 py-4">{user.name}</td>
+                  <td className="px-6 py-4 text-blue-600 dark:text-blue-400">
+                    {user.email}
+                  </td>
+                  <td className="px-6 py-4">{user.address?.city || "N/A"}</td>
+                  <td className="px-6 py-4">
+                    {user.address?.zipcode || "N/A"}
+                  </td>
+                  <td className="px-6 py-4">
                     <Link to={`/users/${user.id}`}>
-                      <button
-                        style={{
-                          padding: "4px 8px",
-                          border: "1px solid #ccc",
-                          borderRadius: "4px",
-                          fontSize: "12px",
-                          cursor: "pointer",
-                        }}
-                      >
+                      <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-md text-sm">
                         View Profile
                       </button>
                     </Link>
