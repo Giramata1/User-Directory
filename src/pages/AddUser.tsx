@@ -68,14 +68,14 @@ const AddUser = () => {
 
   return (
     <div className="flex flex-wrap justify-center gap-10 p-6 font-sans">
-      {/* Storage error */}
+    
       {storageError && (
         <div className="w-full max-w-md p-4 bg-red-100 text-red-700 rounded-md mb-6">
           {storageError}
         </div>
       )}
 
-      {/* Form */}
+     
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="max-w-md w-full p-6 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow"
@@ -169,7 +169,7 @@ const AddUser = () => {
         </button>
       </form>
 
-      {/* User List */}
+    
       <div className="max-w-3xl w-full">
         <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
           User List
