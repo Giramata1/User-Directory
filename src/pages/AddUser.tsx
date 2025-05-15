@@ -68,14 +68,12 @@ const AddUser = () => {
 
   return (
     <div className="flex flex-wrap justify-center gap-10 p-6 font-sans">
-    
       {storageError && (
         <div className="w-full max-w-md p-4 bg-red-100 text-red-700 rounded-md mb-6">
           {storageError}
         </div>
       )}
 
-     
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="max-w-md w-full p-6 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow"
@@ -169,7 +167,6 @@ const AddUser = () => {
         </button>
       </form>
 
-    
       <div className="max-w-3xl w-full">
         <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
           User List
@@ -182,7 +179,6 @@ const AddUser = () => {
               <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Age</th>
               <th className="p-3 text-left">Role</th>
-              <th className="p-3 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -199,20 +195,26 @@ const AddUser = () => {
               users.map((user, idx) => (
                 <tr
                   key={user.id}
-                  className={idx % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : "bg-white dark:bg-gray-700"}
+                  className={
+                    idx % 2 === 0
+                      ? "bg-gray-50 dark:bg-gray-800"
+                      : "bg-white dark:bg-gray-700"
+                  }
                 >
-                  <td className="p-3 border border-gray-300 dark:border-gray-600">{idx + 1}</td>
-                  <td className="p-3 border border-gray-300 dark:border-gray-600">{user.name}</td>
-                  <td className="p-3 border border-gray-300 dark:border-gray-600">{user.email}</td>
-                  <td className="p-3 border border-gray-300 dark:border-gray-600">{user.age}</td>
-                  <td className="p-3 border border-gray-300 dark:border-gray-600">{user.role}</td>
                   <td className="p-3 border border-gray-300 dark:border-gray-600">
-                    <button
-                      onClick={() => handleRemove(user.id)}
-                      className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition-colors duration-150"
-                    >
-                      Remove
-                    </button>
+                    {idx + 1}
+                  </td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">
+                    {user.name}
+                  </td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">
+                    {user.email}
+                  </td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">
+                    {user.age}
+                  </td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-600">
+                    {user.role}
                   </td>
                 </tr>
               ))
